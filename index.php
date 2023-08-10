@@ -55,6 +55,7 @@ if ($action == "get-chat") { // get Link to Live Chat (only YouTube)
  echo "<h1>Audio:</h1>";
  echo "<code>&lt;audio preload='none' controls src='$currentURL?vid=$vidID&format=audio'&gt;&lt;/audio&gt;</code><br>";
  echo "<audio preload='none' controls src='$currentURL?vid=$vidID&format=audio'></audio>";
+ echo "<h2>About Livestreams</h2>YouTube, Twitch and other Livestreaming platforms will return m3u8 files. The Video/Audio Tag is not able to Play m3u8 files. You might be able to get it working with special javascript code. You can still use URLs like '$currentURL?vid=$vidID' in VLC.";
  exit;
 
 } else { // get the Link to the Video
