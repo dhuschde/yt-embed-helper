@@ -6,7 +6,8 @@ $yt_dlp_path = "../bin/yt-dlp"; // where is yt-dlp installed?
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $host = $_SERVER['HTTP_HOST'];
 $uri = $_SERVER['REQUEST_URI'];
-$currentURL = $protocol . $host . $uri;
+$currentURL = $protocol . $host; // . $uri; 
+// !!! (you need to add the uri if this script isn't installed on the root of your (sub)domain)
 
 if (!empty($_GET['vid'])) {
   // Get the vidID from the query string parameter
@@ -14,7 +15,7 @@ if (!empty($_GET['vid'])) {
   $action = $_GET['format'];
 } else {
   // Display the form for entering the video ID
-  echo '<h1>YouTube Downloader</h1>';
+  echo '<h1>YouTube Embed Helper</h1>';
   echo '<p>Enter the video ID:</p>';
   echo '<form method="get">';
   echo '<input type="text" name="vid" placeholder="Video ID"><br>';
@@ -41,11 +42,10 @@ if ($action == "get-chat") { // get Link to Live Chat (only YouTube)
  $command = "$yt_dlp_path -x --get-url {$vidID}";
  $output = shell_exec($command);
 
-} else if ($action == "image") { // get Link to audio
- $command = "$yt_dlp_path --get-id {$vidID}";
+} else if ($action == "image") { // get Link to thumbnail
+ $command = "$yt_dlp_path --get-thumbnail '-f best' {$vidID}";
  $output = shell_exec($command);
  $output = trim($output);
- $output = "https://img.youtube.com/vi/{$output}/maxresdefault.jpg";
 
 } else if ($action == "html") { // show how to embed on website
  echo "<p>You can use this Code to embed the Video on your Website:</p>";
