@@ -16,15 +16,15 @@ if (!empty($_GET['vid'])) {
 } else {
   // Display the form for entering the video ID
   echo '<h1>YouTube Embed Helper</h1>';
-  echo '<p>Enter the video ID:</p>';
   echo '<form method="get">';
-  echo '<input type="text" name="vid" placeholder="Video ID"><br>';
+  echo '<input type="text" name="vid" placeholder="Video ID or URL"><br>';
+  echo '<input type="radio" name="format" value="html" checked> <label>HTML</label>';
   echo '<input type="radio" name="format" value="video"> <label>Video</label>';
   echo '<input type="radio" name="format" value="audio"> <label>Audio</label>';
   echo '<input type="radio" name="format" value="image"> <label>Thumbnail</label>';
-  echo '<input type="radio" name="format" value="html"> <label>HTML</label>';
-  echo '<br><input type="submit" value="Download">';
-  echo '</form><br><br><br>';
+  echo '<br><input type="submit" value="Download"></form>';
+  echo '<div style="border:1px dotted;"><p style="margin:0;">HTML will generate HTML Code that you can use to embed a Video/Audio on a Website.<br>This will use the video/audio tag instead of an iframe.<br>This also works with other Video sites.</p>';
+  echo '</div><br><br><br>';
   echo '<a href="https://github.com/dhuschde/yt-dl-web">Source Code</a>';
   exit;
 }
