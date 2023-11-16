@@ -1,7 +1,7 @@
 <?php
 
 $yt_dlp_path = "../bin/yt-dlp"; // where is yt-dlp installed?
-$proxy = ""; // enter CORS proxy if wanted (with trailing /)
+$proxy = "https://proxy.dhusch.de/"; // enter CORS proxy if wanted (with trailing /)
 
 // get the URL, where this script is installed
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
@@ -108,6 +108,7 @@ header("Location: $currentURL?v=$vidID"); // not using below header bc: you migh
   $vidWidth = $data['width'];
   $platform = $data['extractor_key'];
   $vidShare = $data['webpage_url'];
+  $subtitles = $data['subtitles'];
   if(!empty($proxy)) $proxyText = "This site proxies every connection to $platform.";
 // Building site
   echo "<!DOCTYPE html> 
@@ -144,7 +145,23 @@ header("Location: $currentURL?v=$vidID"); // not using below header bc: you migh
 echo "
 <div style='width: 80%; margin-left: 10%;'>
 <h1>$title</h1>
-<video controls poster='$proxy$thumbnail' src='$proxy$vidUrl' width='100%'></video>
+<video controls poster='$proxy$thumbnail' src='$proxy$vidUrl' width='100%'>
+";
+//Subtitles
+if (isset($data['subtitles']) && is_array($data['subtitles'])) {
+    // Loop through each language
+    foreach ($data['subtitles'] as $langCode => $languageSubtitles) {
+        foreach ($languageSubtitles as $subtitle) {
+	    if($subtitle['ext']=="vtt"){
+		$url=urlencode($subtitle['url']);
+		echo "<track label='{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='sub_proxy.php?url=$url'/>";
+	    }
+        }
+    }
+}
+
+echo "
+</video>
 <p><a href='$uploaderUrl' target='_blank'>$uploaderName</a>$verify($channelSubs) | $vidDate | 👀 $vidViews | 👍 $vidLikes | 💬 $vidComments</p>
 <h2>Description</h2>
 <p>$description</p>
