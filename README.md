@@ -6,7 +6,7 @@ It also works with other Video sites.
 You can try it out at [yt.dhusch.de](https://yt.dhusch.de)
 
 You need to [Download yt-dlp](https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp) and specify the path in the Script! (Line 3)<br>
-If the Page isn't on the root of your (sub)domain, please add the uri to the URL Checker (Line 10)<br>
+If the Page isn't on the root of your (sub)domain, please add the uri to the URL Checker (Line 10) (only tested on root of sub-Domain)<br>
 You can also specify a CORS Proxy (Line 4)
 
 ## "Watch here"
