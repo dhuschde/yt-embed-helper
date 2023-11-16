@@ -7,8 +7,7 @@ $proxy = "https://proxy.dhusch.de/"; // enter CORS proxy if wanted (with trailin
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $host = $_SERVER['HTTP_HOST'];
 $uri = $_SERVER['REQUEST_URI'];
-$currentURL = $protocol . $host; // . $uri; 
-// !!! (you need to add the uri if this script isn't installed on the root of your (sub)domain)
+$currentURL = $protocol . $host;
 
 if (!empty($_GET['vid'])) {
   // Get the vidID from the query string parameter
@@ -84,6 +83,23 @@ header("Location: $currentURL?v=$vidID"); // not using below header bc: you migh
     echo '<pre>', htmlspecialchars($content), '</pre>';
    exit;
 
+} else if ($action == "sub_proxy") { // subtitle Proxy (Cross Origin is bad)
+
+header("Content-Type: text/vtt; charset=UTF-8");
+
+if (empty($vidID)) {
+    die('Error: VTT URL is missing.');
+}
+
+$ch = curl_init($vidID);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_ENCODING, ''); // Automatically decode gzip
+$vttContent = curl_exec($ch);
+curl_close($ch);
+
+echo $vttContent;
+exit;
+
 } else if ($action == "watch-here") { // show video on front end
   $command = "$yt_dlp_path -j -f 'best/bestvideo+bestaudio' $vidID";
   $output = shell_exec($command);
@@ -153,7 +169,7 @@ if (isset($data['subtitles']) && is_array($data['subtitles'])) {
         foreach ($languageSubtitles as $subtitle) {
 	    if($subtitle['ext']=="vtt"){
 		$url=urlencode($subtitle['url']);
-		echo "<track label='{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='sub_proxy.php?url=$url'/>";
+		echo "<track label='{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='./?format=sub_proxy&vid=$url'/>";
 	    }
         }
     }
@@ -166,7 +182,7 @@ if (isset($data['automatic_captions']) && is_array($data['automatic_captions']))
         foreach ($languageSubtitles as $subtitle) {
             if($subtitle['ext']=="vtt" && !empty($subtitle['name'])){
                 $url=urlencode($subtitle['url']);
-                echo "<track label='Auto-{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='sub_proxy.php?url=$url'/>";
+                echo "<track label='Auto-{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='./?format=sub_proxy&vid=$url'/>";
             }
         }
     }
