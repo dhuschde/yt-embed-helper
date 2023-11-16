@@ -108,7 +108,6 @@ header("Location: $currentURL?v=$vidID"); // not using below header bc: you migh
   $vidWidth = $data['width'];
   $platform = $data['extractor_key'];
   $vidShare = $data['webpage_url'];
-  $subtitles = $data['subtitles'];
   if(!empty($proxy)) $proxyText = "This site proxies every connection to $platform.";
 // Building site
   echo "<!DOCTYPE html> 
@@ -159,6 +158,20 @@ if (isset($data['subtitles']) && is_array($data['subtitles'])) {
         }
     }
 }
+
+// Auto Subtitles
+if (isset($data['automatic_captions']) && is_array($data['automatic_captions'])) {
+    // Loop through each language
+    foreach ($data['automatic_captions'] as $langCode => $languageSubtitles) {
+        foreach ($languageSubtitles as $subtitle) {
+            if($subtitle['ext']=="vtt" && !empty($subtitle['name'])){
+                $url=urlencode($subtitle['url']);
+                echo "<track label='Auto-{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='sub_proxy.php?url=$url'/>";
+            }
+        }
+    }
+}
+
 
 echo "
 </video>
