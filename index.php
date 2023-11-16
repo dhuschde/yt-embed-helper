@@ -1,7 +1,7 @@
 <?php
 
 $yt_dlp_path = "../bin/yt-dlp"; // where is yt-dlp installed?
-$proxy = ""; // enter proxy if wanted (with trailing /)
+$proxy = ""; // enter CORS proxy if wanted (with trailing /)
 
 // get the URL, where this script is installed
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
