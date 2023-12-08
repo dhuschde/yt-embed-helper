@@ -58,7 +58,7 @@ foreach ($files as $file) {
 }
 
 if ($action == "get-chat") { // get Link to Live Chat (only YouTube)
- $command = "$yt_dlp_path --get-id ";
+ $command = "$yt_dlp_path --get-id {$vidID}";
  $output = shell_exec($command);
  if (empty($output)) {
  echo "There was an Error<br>Tries again in 15 Seconds<br><meta http-equiv='refresh' content='15'>";
