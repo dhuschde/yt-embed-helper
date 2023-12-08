@@ -10,8 +10,19 @@ You can also specify a CORS Proxy (Line 4)
 
 ## Install
 put the file index.php on the root of your (sub)Domain<br>
+```
+wget https://raw.githubusercontent.com/dhuschde/yt-dl-web/main/index.php
+```
+crate cache dir and give permissions: <br>
+```
+mkdir cache
+chmod 777 cache
+```
 put yt-dlp on your system<br>
-specify the path to yt-dlp on Line 3
+```
+wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+```
+**specify the path to yt-dlp on Line 3**
 
 ## "Watch here"
 Using the watch-here feature, you can somewhat use this as an alternative frontend for youtube
