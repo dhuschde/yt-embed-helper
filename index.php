@@ -30,11 +30,11 @@ foreach ($files as $file) {
 }
   
   // read cache and create if necessary 
-  if (!file_exists("cache/$vidID.json")) {
+  if (!file_exists("cache/" . md5($vidID) . ".json")) {
   $jsonCmd = shell_exec("$yt_dlp_path -j -f 'best/bestvideo+bestaudio' $vidID");
-  file_put_contents("cache/$vidID.json", $jsonCmd);
+  file_put_contents("cache/" . md5($vidID) . ".json", $jsonCmd);
   }
-  $jsonData = file_get_contents("cache/$vidID.json");
+  $jsonData = file_get_contents("cache/" . md5($vidID) . ".json");
   $data = json_decode($jsonData, true);
   
   
