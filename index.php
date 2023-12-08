@@ -9,13 +9,35 @@ $host = $_SERVER['HTTP_HOST'];
 $uri = $_SERVER['REQUEST_URI'];
 $currentURL = $protocol . $host;
 
-if (!empty($_GET['vid'])) {
+if (!empty($_GET['vid']) or !empty($_GET['v'])) { // vid id is given
   // Get the vidID from the query string parameter
-  $vidID = $_GET['vid'];
-  $action = $_GET['format'];
-} else if(!empty($_GET['v'])) {
-  $vidID = $_GET['v'];
-  $action = 'watch-here';
+	  if(!empty($_GET['vid'])){ // normal
+	  $vidID = $_GET['vid'];
+	  $action = $_GET['format'];
+	  } elseif(!empty($_GET['v'])){ // for watch-here only
+	  $vidID = $_GET['v'];
+	  $action = 'watch-here';
+	  }
+  
+  // Delete files older than one hour in the cache directory
+$files = glob("cache/" . '*.json');
+$currentTimestamp = time();
+foreach ($files as $file) {
+    $fileAge = $currentTimestamp - filemtime($file);
+    if ($fileAge > 3600) {
+        unlink($file);
+    }
+}
+  
+  // read cache and create if necessary 
+  if (!file_exists("cache/$vidID.json")) {
+  $jsonCmd = shell_exec("$yt_dlp_path -j -f 'best/bestvideo+bestaudio' $vidID");
+  file_put_contents("cache/$vidID.json", $jsonCmd);
+  }
+  $jsonData = file_get_contents("cache/$vidID.json");
+  $data = json_decode($jsonData, true);
+  
+  
 } else {
   // Display the form for entering the video ID
   echo '<h1>YouTube Embed Helper</h1>';
@@ -36,7 +58,7 @@ if (!empty($_GET['vid'])) {
 }
 
 if ($action == "get-chat") { // get Link to Live Chat (only YouTube)
- $command = "$yt_dlp_path --get-id {$vidID}";
+ $command = "$yt_dlp_path --get-id ";
  $output = shell_exec($command);
  if (empty($output)) {
  echo "There was an Error<br>Tries again in 15 Seconds<br><meta http-equiv='refresh' content='15'>";
@@ -44,14 +66,12 @@ if ($action == "get-chat") { // get Link to Live Chat (only YouTube)
  }
  $output = "https://studio.youtube.com/live_chat?is_popout=1&v=$output";
 
-} else if ($action == "audio") { // get Link to audio
+} else if ($action == "audio") { // get Link to audio (cache not used for reason: getting video, not audio)
  $command = "$yt_dlp_path --prefer-free-formats -x --get-url {$vidID}";
  $output = shell_exec($command);
 
 } else if ($action == "image") { // get Link to thumbnail
- $command = "$yt_dlp_path --get-thumbnail '-f best' {$vidID}";
- $output = shell_exec($command);
- $output = trim($output);
+ $output = $data['thumbnail'];
 
 } else if ($action == "html") { // show how to embed on website
  echo "<p>You can use this Code to embed the Video on your Website:</p>";
@@ -65,16 +85,13 @@ if ($action == "get-chat") { // get Link to Live Chat (only YouTube)
  exit;
 
 } else if ($action == "json") { // give out metadata about video
- $command = "$yt_dlp_path -j -f 'best/bestvideo+bestaudio' $vidID";
- $output = shell_exec($command);
  header('Content-Type: application/json');
- echo "$output";
+ echo "$jsonData";
  exit;
 
 } else if ($action == "watch") { // prettyfy link a bit
-if (strpos($vidID, "youtu") !== false) {
-$command = "$yt_dlp_path --get-id {$vidID}";
- $vidID = shell_exec($command);
+if ($data['extractor'] == "youtube") {
+ $vidID = $data['id'];
 }
 header("Location: $currentURL?v=$vidID"); // not using below header bc: you might use a proxy
 
@@ -101,10 +118,6 @@ echo $vttContent;
 exit;
 
 } else if ($action == "watch-here") { // show video on front end
-  $command = "$yt_dlp_path -j -f 'best/bestvideo+bestaudio' $vidID";
-  $output = shell_exec($command);
-  $data = json_decode($output, true);
-
 // Video Infos
   $title = $data['title'];
   $uploaderName = $data['channel'];
@@ -114,6 +127,7 @@ exit;
   $vidUrl = $data['url'];
   $thumbnail = $data['thumbnail'];
   $description = nl2br(htmlspecialchars($data['description'], ENT_QUOTES, 'UTF-8'));
+  if(empty($description)) $description = "This videos Description is empty.";
   $vidLikes = $data['like_count'];
   $vidDate = $data['upload_date'];
   $vidDate = DateTime::createFromFormat('Ymd', $vidDate);
@@ -127,14 +141,14 @@ exit;
   if(!empty($proxy)) $proxyText = "This site proxies every connection to $platform.";
 // Building site
   echo "<!DOCTYPE html> 
-<html lang='en'>
+<html lang='{$data['language']}'>
 <head>
     <meta charset='UTF-8'>
     <meta property='og:title' content='$title - $uploaderName - $platform'>
     <meta property='og:description' content='$description'>
     <meta property='og:image' content='$proxy$thumbnail'>
-    <meta property='og:video' content='$proxy$vidUrl'>
-    <meta property='og:video:secure_url' content='$proxy$vidUrl'>
+    <meta property='og:video' content='{$currentURL}?vid=$vidID'>
+    <meta property='og:video:secure_url' content='{$currentURL}?vid=$vidID'>
     <meta property='og:video:type' content='video/mp4'>
     <meta property='og:video:width' content='vidWidth'>
     <meta property='og:video:height' content='$vidHeight'>
@@ -144,9 +158,6 @@ exit;
         body {
             background-color: #2d2d2d;
             color: white;
-	    align-items: center;
-	    justify-content: center;
-
         }
 
         a {
@@ -155,14 +166,13 @@ exit;
         }
     </style>
 </head>
-<body>";
+<body>
 
-echo "
 <div style='width: 80%; margin-left: 10%;'>
 <h1>$title</h1>
-<video controls poster='$proxy$thumbnail' src='$proxy$vidUrl' width='100%'>
+<video class='center' controls poster='$proxy$thumbnail' src='$proxy$vidUrl' style='margin-left:auto;margin-right:auto;display:block; max-height:80vh;max-width:100%'>
 ";
-//Subtitles
+//Subtitles TODO: Optimize!
 if (isset($data['subtitles']) && is_array($data['subtitles'])) {
     // Loop through each language
     foreach ($data['subtitles'] as $langCode => $languageSubtitles) {
@@ -175,12 +185,25 @@ if (isset($data['subtitles']) && is_array($data['subtitles'])) {
     }
 }
 
+// Auto Subtitles (Original)
+if (isset($data['automatic_captions']) && is_array($data['automatic_captions'])) {
+    // Loop through each language
+    foreach ($data['automatic_captions'] as $langCode => $languageSubtitles) {
+        foreach ($languageSubtitles as $subtitle) {
+            if($subtitle['ext']=="vtt" && !empty($subtitle['name']) && stripos($subtitle['name'], 'original')){
+                $url=urlencode($subtitle['url']);
+                echo "<track label='Auto-{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='./?format=sub_proxy&vid=$url'/>";
+            }
+        }
+    }
+}
+
 // Auto Subtitles
 if (isset($data['automatic_captions']) && is_array($data['automatic_captions'])) {
     // Loop through each language
     foreach ($data['automatic_captions'] as $langCode => $languageSubtitles) {
         foreach ($languageSubtitles as $subtitle) {
-            if($subtitle['ext']=="vtt" && !empty($subtitle['name'])){
+            if($subtitle['ext']=="vtt" && !empty($subtitle['name']) && !stripos($subtitle['name'], 'original')){
                 $url=urlencode($subtitle['url']);
                 echo "<track label='Auto-{$subtitle['name']}' kind='subtitles' srclang='$langCode' src='./?format=sub_proxy&vid=$url'/>";
             }
@@ -192,18 +215,23 @@ if (isset($data['automatic_captions']) && is_array($data['automatic_captions']))
 echo "
 </video>
 <p><a href='$uploaderUrl' target='_blank'>$uploaderName</a>$verify($channelSubs) | $vidDate | 👀 $vidViews | 👍 $vidLikes | 💬 $vidComments</p>
+<hr><p>Availability: {$data['availability']} | Age Limit: {$data['age_limit']}<br>Category: ";
+foreach($data['categories'] as $tag) echo "$tag ";
+if(!empty($data['tags']))echo "<br>Tags: ";
+foreach($data['tags'] as $tag) echo "$tag, ";
+echo "</p>
+<p><a href='$vidShare' target='_blank'>Open on $platform</a> | <a href='.?vid=$vidID&format=html' target='_blank'>Embed Code</a></p>
+<hr>
 <h2>Description</h2>
 <p>$description</p>
 </div><br>
-<small>Disclaimer: this site doesn't host any of the above content. It is hosted on $platform. $proxyText Go watch on <a target='_blank' href='$vidShare'>$platform</a>. Please send (DMCA) Takedown requests directly to $platform!</small>
-";
-
-echo "</body></html>";
+<small>Disclaimer: this site doesn't host any of the above content. It is hosted on $platform. $proxyText Please send (DMCA) Takedown requests directly to $platform!</small>
+</body>
+</html>";
   exit;
 
 } else { // get the Link to the Video
- $command = "$yt_dlp_path --prefer-free-formats -f 'best/bestvideo+bestaudio' --get-url {$vidID}";
- $output = shell_exec($command);
+ $output = $data['url'];
 }
 
 if (!empty($output)) {
