@@ -13,7 +13,7 @@ put the file index.php on the root of your (sub)Domain<br>
 ```
 wget https://raw.githubusercontent.com/dhuschde/yt-dl-web/main/index.php
 ```
-crate cache dir and give permissions: <br>
+create cache dir and give permissions: <br>
 ```
 mkdir cache
 chmod 777 cache
