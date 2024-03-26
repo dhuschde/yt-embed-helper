@@ -1,7 +1,7 @@
 <?php
 
 $yt_dlp_path = "../bin/yt-dlp"; // where is yt-dlp installed?
-$proxy = ""; // enter CORS proxy if wanted (with trailing /)
+if($_GET['proxy'] != "false") $proxy = ""; // enter CORS proxy if wanted (with trailing /)
 
 // get the URL, where this script is installed
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
@@ -67,7 +67,7 @@ echo "
   echo '<input type="radio" name="format" value="image"> <label>Thumbnail</label>';
   echo '<input type="radio" name="format" value="json"> <label>Metadata/JSON</label>';
   echo '<br><input type="submit" value="Do it"></form>';
-  echo '<div style="border:1px dotted;"><p style="margin:0;">This also works with other Video sites.<br>Contact Info for Issues: <a target="_blank" href="https://dhusch.de/kontakt">click here</a><br>Please send (DMCA) Takedowns directly to the Platform the video is hosted on!</p>';
+  echo '<div style="border:1px dotted;"><p style="margin:0;">This also works with other Video sites.<br>Contact Info for Issues: <a href="mailto:yt-embed@dhusch.de">click here</a><br>Please send (DMCA) Takedowns directly to the Platform the video is hosted on!</p>';
   echo '</div><br><br><br>';
   echo '<a href="./?vid=none&format=source-code">Source Code</a><hr>';
   echo '<h2>Privacy Policy</h2>
@@ -81,7 +81,7 @@ echo "
 </ol>
 <h3>Cache</h3>
 <p>We also keep a Videos MetaData for about one hour to reduce stress on our system</p>';
-if(!empty($proxy))echo '<h3>What we send to third Party (like YouTube)</h3><p>We use a Proxy, therefore:</p><ol><li>OUR IP Address</li><li>YOUR User Agent</li><li>Time of Access</li><li>They might get additional Info - read their Privacy Policy for more Info</li></ol><p><a target="_blank" href="https://policies.google.com/privacy?hl=de">YouTubes Privacy Policy</a></p>';
+if(!empty($proxy))echo '<h3>What we send to third Party (like YouTube)</h3><p>We use a Proxy, therefore:</p><ol><li>OUR IP Address</li><li>YOUR Browser Agent</li><li>Time of Access</li><li>They might get additional Info - read their Privacy Policy for more Info</li></ol><p><a target="_blank" href="https://policies.google.com/privacy?hl=de">YouTubes Privacy Policy</a></p>';
 echo "</body>";
   exit;
 }
@@ -291,3 +291,4 @@ if (!empty($output)) {
   exit;
 }
 ?>
+
