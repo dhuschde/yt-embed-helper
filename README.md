@@ -6,7 +6,8 @@ It also works with other Video sites.
 You can try it out at [yt.dhusch.de](https://yt.dhusch.de)
 
 You need to [Download yt-dlp](https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp) and specify the path in the Script! (Line 3)<br>
-You can also specify a CORS Proxy (Line 4)
+You can also specify a CORS Proxy (Line 4)<br>
+And please set a Contact Mail (Line 5)
 
 ## Install
 put the file index.php on the root of your (sub)Domain<br>
